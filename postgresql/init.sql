@@ -1,8 +1,0 @@
-CREATE DATABASE userdb;
-
-\c userdb
-
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);

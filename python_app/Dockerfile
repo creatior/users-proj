@@ -22,7 +22,7 @@ COPY --from=builder /root/.local/bin /root/.local/bin
 ENV PYTHONPATH="/root/.local/lib/python3.12/site-packages /root/.local/lib/python3.12/site-packages" \
     PATH="/root/.local/bin:${PATH}"
 
-COPY /src /src
+COPY . .
 
 # RUN make test
 
