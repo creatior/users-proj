@@ -75,8 +75,8 @@ jobs:
         run: |
           docker save -o image_web.tar users-proj_web
 
-      - name: Delete pythonapp image
-        run: docker rmi users-proj_web
+      # - name: Delete pythonapp image
+      #   run: docker rmi users-proj_web
       
       - name: Push tar files and docker-compose.yml on server
         run: |
