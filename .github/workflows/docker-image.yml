@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: self-hosted
+    runs-on: github-hosted
     steps:
       - name: Add all repository
         uses: actions/checkout@v3
@@ -31,7 +31,7 @@ jobs:
 
   test:
     name: Testing
-    runs-on: self-hosted
+    runs-on: github-hosted
     needs: build
     steps:
       - name: Add all repository
@@ -59,7 +59,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: self-hosted
+    runs-on: github-hosted
     needs: test
     
     defaults:

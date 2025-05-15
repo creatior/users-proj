@@ -1,65 +1,92 @@
-name: CI/CD Pipeline
+name: Docker Build, Test and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "master" ]
+
+# env:
+#   DOCKER_IMAGE: creatior3/users-proj:latest
+#   SERVER_SSH: ${{ secrets.SERVER_SSH }}
+#   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13-alpine
-        env:
-          POSTGRES_USER: kubsu
-          POSTGRES_PASSWORD: kubsu
-          POSTGRES_DB: kubsu
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
+  build:
+    name: Build
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - name: Add all repository
+        uses: actions/checkout@v3
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
+      - name: Build all images
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[test]"
-
-      - name: Run tests with pytest
-        env:
-          DATABASE_URL: postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu
+          docker pull postgres:lastest
+          docker-compose build
+      
+      - name: Check existence images
         run: |
-          pytest tests/ -v
+          docker image inspect postgres:latest
+          docker image inspect creatior3/users-proj:latest
+
+  test:
+    name: Testing
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Add all repository
+        uses: actions/checkout@v3
+      
+      - name: Run app
+        run: docker-compose up -d
+      
+      - name: Waiting for Postgres
+        run: |
+          for i in {1..5}; do
+            docker-compose exec db pg_isready -U ${{ secrets.DB_USER }} && break
+            echo "Waiting for Postgres: ($i/5)"
+            sleep 10
+          done
+      
+      - name: Run tests
+        run: docker-compose exec creatior3/users-proj pytest tests
+
+      - name: Stop and remove containers
+        run: docker-compose down -v
+
+      - name: Clean working directory
+        run: rm -rf $GITHUB_WORKSPACE/*
 
   deploy:
-    name: Build and Push Docker Image
-    needs: test  # Зависит от успешного прохождения тестов
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # Только при пуше в main
+    name: Deploy
+    runs-on: self-hosted
+    needs: test
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: "~/docker"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Create tar files
+        run: docker save -o users-proj.tar creatior3/users-proj:latest
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Delete pythonapp image
+        run: docker rmi creatior3/users-proj:latest
+      
+      - name: Push tar files and docker-compose.yml on server
+        run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/docker/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./python_app
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/kubsu-app:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/kubsu-app:${{ github.sha }}
+      # - name: Clean working directory
+      #   run: rm -rf /home/creatior/docker/images
+
+      - name: Connect to server and start app
+        run: |
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} \
+          cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker \
+          podman stop usersprojcont && \
+          podman rm usersprojcont && \
+          podman rmi creatior3/users-proj:latest && \
+          podnam load -i users-proj.tar && \
+          podman run -d --network=host --name usersprojcont -e DATABASE_URL="postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu" creatior3/users-proj:latest && \
+          rm users-proj.tar
