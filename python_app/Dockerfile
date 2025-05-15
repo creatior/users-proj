@@ -20,8 +20,8 @@ WORKDIR /app
 COPY --from=builder /root/.local/lib/python3.12/site-packages /root/.local/lib/python3.12/site-packages
 COPY --from=builder /root/.local/bin /root/.local/bin
 
-ENV PYTHONPATH="/app:/root/.local/lib/python3.12/site-packages" \
-    PATH="/root/.local/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}" \
+    PYTHONPATH="/app:${PYTHONPATH}"
 
 COPY . .
 

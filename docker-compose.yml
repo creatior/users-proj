@@ -1,35 +1,36 @@
-version: '3.8'
+  version: '3.8'
 
-services:
-  web:
-    build: 
-      context: ./python_app
-      target: prod
-    ports:
-      - "8077:8000"
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgresql+psycopg://kubsu:kubsu@db:5432/kubsu
+  services:
+    web:
+      build: 
+        context: ./python_app
+        target: prod
+      ports:
+        - "8077:8000"
+      depends_on:
+        - db
+      environment:
+        - DATABASE_URL=postgresql+psycopg://kubsu:kubsu@db:5432/kubsu
 
-  test:
-    build:
-      context: .
-      target: test
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: "postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}"
+    test:
+      build:
+        context: ./python_app
+        target: test
+      depends_on:
+        - db
+      environment:
+        - DATABASE_URL=postgresql+psycopg://kubsu:kubsu@db:5432/kubsu
+      command: ["python", "-m", "pytest", "tests"]
 
-  db:
-    image: postgres:13-alpine
-    environment:
-      POSTGRES_USER: kubsu
-      POSTGRES_PASSWORD: kubsu
-      POSTGRES_DB: kubsu
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-volumes:
-  postgres:
+    db:
+      image: postgres:13-alpine
+      environment:
+        POSTGRES_USER: kubsu
+        POSTGRES_PASSWORD: kubsu
+        POSTGRES_DB: kubsu
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres:/var/lib/postgresql/data
+  volumes:
+    postgres:
