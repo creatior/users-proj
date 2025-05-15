@@ -49,7 +49,7 @@ jobs:
           done
       
       - name: Run tests
-        run: docker-compose exec users-proj_web pytest tests
+        run: docker-compose exec users-proj_web pytest tests -v
 
       - name: Stop and remove containers
         run: docker-compose down -v
