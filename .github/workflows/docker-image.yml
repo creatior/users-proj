@@ -1,0 +1,92 @@
+name: Docker Build, Test and Deploy
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+# env:
+#   DOCKER_IMAGE: creatior3/users-proj:latest
+#   SERVER_SSH: ${{ secrets.SERVER_SSH }}
+#   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: self-hosted
+    steps:
+      - name: Add all repository
+        uses: actions/checkout@v3
+
+      - name: Build all images
+        run: |
+          docker pull postgres:lastest
+          docker-compose build
+      
+      - name: Check existence images
+        run: |
+          docker image inspect postgres:latest
+          docker image inspect creatior3/users-proj:latest
+
+  test:
+    name: Testing
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Add all repository
+        uses: actions/checkout@v3
+      
+      - name: Run app
+        run: docker-compose up -d
+      
+      - name: Waiting for Postgres
+        run: |
+          for i in {1..5}; do
+            docker-compose exec db pg_isready -U ${{ secrets.DB_USER }} && break
+            echo "Waiting for Postgres: ($i/5)"
+            sleep 10
+          done
+      
+      - name: Run tests
+        run: docker-compose exec creatior3/users-proj pytest tests
+
+      - name: Stop and remove containers
+        run: docker-compose down -v
+
+      - name: Clean working directory
+        run: rm -rf $GITHUB_WORKSPACE/*
+
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    needs: test
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: "~/docker"
+
+    steps:
+      - name: Create tar files
+        run: docker save -o users-proj.tar creatior3/users-proj:latest
+
+      - name: Delete pythonapp image
+        run: docker rmi creatior3/users-proj:latest
+      
+      - name: Push tar files and docker-compose.yml on server
+        run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/docker/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
+
+      # - name: Clean working directory
+      #   run: rm -rf /home/creatior/docker/images
+
+      - name: Connect to server and start app
+        run: |
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} \
+          cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker \
+          podman stop usersprojcont && \
+          podman rm usersprojcont && \
+          podman rmi creatior3/users-proj:latest && \
+          podnam load -i users-proj.tar && \
+          podman run -d --network=host --name usersprojcont -e DATABASE_URL="postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu" creatior3/users-proj:latest && \
+          rm users-proj.tar
