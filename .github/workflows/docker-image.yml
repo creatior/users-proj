@@ -50,11 +50,6 @@ jobs:
       - name: Check container status
         run: docker-compose ps
 
-      - name: Install test dependencies
-        run: | 
-          docker-compose exec users-proj_web python -m pip install --upgrade pip
-          docker-compose exec users-proj_web python -m pip install pytest
-
       - name: Run tests
         run: docker-compose exec -T users-proj_web pytest tests -v
 
