@@ -46,8 +46,11 @@ jobs:
             sleep 10 \
           done
       
+      - name: Install test dependencies
+        run: docker-compose exec -T users-proj_web pip install pytest
+
       - name: Run tests
-        run: docker-compose exec -T users-proj_web pytest python_app/tests -v
+        run: docker-compose exec -T users-proj_web pytest tests -v
 
       - name: Stop and remove containers
         run: docker-compose down -v

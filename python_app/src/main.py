@@ -6,8 +6,6 @@ from src.database import init_db, get_db
 
 app = FastAPI()
 
-print("hi")
-
 @app.on_event("startup")
 async def startup():
     await init_db()
