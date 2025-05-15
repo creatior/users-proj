@@ -25,7 +25,7 @@ jobs:
       
       - name: Check existence images
         run: |
-          docker image inspect postgres:13-alpine \
+          docker image inspect postgres:13-alpine
           docker image inspect users-proj_web
 
   test:
