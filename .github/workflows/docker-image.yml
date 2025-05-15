@@ -43,7 +43,7 @@ jobs:
       - name: Waiting for Postgres
         run: |
           for i in {1..5}; do
-            docker-compose exec db pg_isready -U ${{ secrets.DB_USER }} && break
+            docker-compose exec -T db pg_isready -U ${{ secrets.DB_USER }} && break
             echo "Waiting for Postgres: ($i/5)"
             sleep 10
           done
@@ -87,6 +87,6 @@ jobs:
           podman stop usersprojcont && \
           podman rm usersprojcont && \
           podman rmi users-proj_web && \
-          podnam load -i users-proj.tar && \
+          podman load -i users-proj.tar && \
           podman run -d --network=host --name usersprojcont -e DATABASE_URL="postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu" creatior3/users-proj:latest && \
           rm users-proj.tar
