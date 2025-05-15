@@ -78,9 +78,9 @@ jobs:
         run: docker rmi users-proj_web
       
       - name: Push tar files and docker-compose.yml on server
-        run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/docker/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
+        run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/users-proj/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
 
-      # - name: Clean working directory #jajjaja  
+      # - name: Clean working directory
       #   run: rm -rf /home/creatior/docker/images
 
       - name: Connect to server and start app
