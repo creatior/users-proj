@@ -72,13 +72,15 @@ jobs:
 
     steps:
       - name: Create tar files
-        run: docker save -o users-proj.tar users-proj_web
+        run: |
+          docker save -o image_web.tar users-proj_web
 
       - name: Delete pythonapp image
         run: docker rmi users-proj_web
       
       - name: Push tar files and docker-compose.yml on server
-        run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/users-proj/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
+        run: |
+          scp -P ${{ secrets.SERVER_PORT }} /home/creatior/users-proj/image_web.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
 
       # - name: Clean working directory
       #   run: rm -rf /home/creatior/docker/images
@@ -87,9 +89,7 @@ jobs:
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} \
           cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker \
-          podman stop usersprojcont && \
-          podman rm usersprojcont && \
-          podman rmi users-proj_web && \
-          podman load -i users-proj.tar && \
-          podman run -d --network=host --name usersprojcont -e DATABASE_URL="postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu" creatior3/users-proj:latest && \
-          rm users-proj.tar
+          podman-compose down -v && \
+          podman load -i image_web.tar && \
+          podman-compose up --build && \
+          rm image_web.tar
