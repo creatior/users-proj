@@ -20,6 +20,8 @@ WORKDIR /app
 COPY --from=builder /root/.local/lib/python3.12/site-packages /root/.local/lib/python3.12/site-packages
 COPY --from=builder /root/.local/bin /root/.local/bin
 
+COPY --from=builder /usr/local/bin/pytest /usr/local/bin/pytest
+
 ENV PATH="/root/.local/bin:${PATH}" \
     PYTHONPATH="/app:${PYTHONPATH}"
 
