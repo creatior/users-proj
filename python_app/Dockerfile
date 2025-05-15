@@ -17,6 +17,10 @@ FROM python:3.12-slim AS test
 
 WORKDIR /app
 
+RUN pip install pytest && \
+    pip install pytest_asyncio && \
+    pip install httpx
+
 COPY --from=builder /root/.local/lib/python3.12/site-packages /root/.local/lib/python3.12/site-packages
 COPY --from=builder /root/.local/bin /root/.local/bin
 
