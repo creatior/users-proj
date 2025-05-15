@@ -69,7 +69,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: "~/docker"
 
     steps:
       - name: Create tar files
