@@ -27,7 +27,7 @@ jobs:
       - name: Check existence images
         run: |
           docker image inspect postgres:latest
-          docker image inspect creatior3/users-proj:latest
+          docker image inspect users-proj_web
 
   test:
     name: Testing
@@ -49,7 +49,7 @@ jobs:
           done
       
       - name: Run tests
-        run: docker-compose exec creatior3/users-proj pytest tests
+        run: docker-compose exec users-proj_web pytest tests
 
       - name: Stop and remove containers
         run: docker-compose down -v
@@ -69,10 +69,10 @@ jobs:
 
     steps:
       - name: Create tar files
-        run: docker save -o users-proj.tar creatior3/users-proj:latest
+        run: docker save -o users-proj.tar users-proj_web
 
       - name: Delete pythonapp image
-        run: docker rmi creatior3/users-proj:latest
+        run: docker rmi users-proj_web
       
       - name: Push tar files and docker-compose.yml on server
         run: scp -P ${{ secrets.SERVER_PORT }} /home/creatior/docker/users-proj.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
@@ -86,7 +86,7 @@ jobs:
           cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker \
           podman stop usersprojcont && \
           podman rm usersprojcont && \
-          podman rmi creatior3/users-proj:latest && \
+          podman rmi users-proj_web && \
           podnam load -i users-proj.tar && \
           podman run -d --network=host --name usersprojcont -e DATABASE_URL="postgresql+psycopg://kubsu:kubsu@localhost:5432/kubsu" creatior3/users-proj:latest && \
           rm users-proj.tar
