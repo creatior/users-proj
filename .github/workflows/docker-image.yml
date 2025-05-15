@@ -29,35 +29,34 @@ jobs:
           docker image inspect users-proj_web
 
   test:
-    name: Testing
-    runs-on: self-hosted
-    needs: build
-    steps:
-      - name: Add all repository
-        uses: actions/checkout@v3
-      
-      - name: Run app
-        run: docker-compose up -d
-      
-      - name: Waiting for Postgres
-        run: |
-          for i in {1..5}; do
-            docker-compose exec -T db pg_isready -U ${{ secrets.DB_USER }} && break
-            echo "Waiting for Postgres: ($i/5)"
-            sleep 10
-          done
-      
-      - name: Check container status
-        run: docker-compose ps
-
-      - name: Run tests
-        run: docker-compose exec -T users-proj_web pytest tests -v
-
-      - name: Stop and remove containers
-        run: docker-compose down -v
-
-      - name: Clean working directory
-        run: rm -rf $GITHUB_WORKSPACE/*
+  name: Testing
+  runs-on: self-hosted
+  needs: build
+  steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build test image
+      run: docker-compose build test
+    
+    - name: Start dependencies
+      run: docker-compose up -d db 
+    
+    - name: Wait for Postgres
+      run: |
+        for i in {1..5}; do
+          docker-compose exec -T db pg_isready -U ${{ secrets.DB_USER }} && break
+          echo "Waiting for Postgres: ($i/5)"
+          sleep 10
+        done
+    
+    - name: Run tests
+      run: docker-compose run --rm test
+    
+    - name: Cleanup
+      run: docker-compose down -v
+    
+    - name: Clean working directory
+      run: rm -rf $GITHUB_WORKSPACE/*
 
   deploy:
     name: Deploy
