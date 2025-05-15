@@ -25,7 +25,7 @@ ENV PATH="/root/.local/bin:${PATH}" \
 
 COPY . .
 
-CMD ["pytest", "tests"]
+CMD ["python", "-m", "pytest", "tests"]
 
 # final stage
 FROM python:3.12-slim as prod
