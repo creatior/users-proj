@@ -83,7 +83,7 @@ jobs:
           scp -P ${{ secrets.SERVER_PORT }} /home/creatior/actions-runner/_work/users-proj/users-proj/image_web.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
 
       # - name: Clean working directory
-      #   run: rm -rf /home/creatior/docker/images
+      #   run: rm -rf /home/creatior/docker/images 
 
       - name: Connect to server and start app
         run: |
