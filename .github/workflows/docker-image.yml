@@ -87,4 +87,4 @@ jobs:
 
       - name: Connect to server and start app
         run: |
-          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && podman-compose down -v && podman load -i image_web.tar && podman-compose up --build -d && rm image_web.tar"
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && podman-compose down -v && podman load -i image_web.tar && podman-compose up -d && rm image_web.tar"
