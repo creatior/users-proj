@@ -59,7 +59,7 @@ jobs:
         run: docker-compose down -v
       
       - name: Clean working directory
-        run: rm -rf $GITHUB_WORKSPACE/*
+        run: rm -rf $GITHUB_WORKSPACE/* 
 #
   deploy:
     name: Deploy
@@ -78,4 +78,5 @@ jobs:
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && \
           podman-compose down -v && \
-          podman-compose up --build -d db web"
+          podman-compose build db web && \
+          podman-compose up -d db web"
