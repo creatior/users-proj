@@ -60,7 +60,7 @@ jobs:
       
       - name: Clean working directory
         run: rm -rf $GITHUB_WORKSPACE/*
-
+#
   deploy:
     name: Deploy
     runs-on: self-hosted
