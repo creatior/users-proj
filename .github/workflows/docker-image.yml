@@ -74,9 +74,6 @@ jobs:
       - name: Push image to dockerhub
         run: docker push creatior3/users-proj_web
 
-      - name: Delete pythonapp image
-        run: docker rmi users-proj_web
-      
       - name: Connect to server and start app
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && \
