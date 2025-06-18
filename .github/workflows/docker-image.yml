@@ -71,21 +71,14 @@ jobs:
         shell: bash
 
     steps:
-      - name: Create tar files
-        run: |
-          docker save -o image_web.tar users-proj_web
+      - name: Push image to dockerhub
+        run: docker push creatior3/users-proj_web
 
       - name: Delete pythonapp image
         run: docker rmi users-proj_web
       
-      - name: Push tar files and docker-compose.yml on server
-        run: |
-          scp -P ${{ secrets.SERVER_PORT }} /home/creatior/actions-runner/_work/users-proj/users-proj/image_web.tar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}}:/home/${{ secrets.SERVER_USERNAME }}/tasks/docker
-
       - name: Connect to server and start app
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && \
           podman-compose down -v && \
-          podman load -i image_web.tar && \
-          podman-compose up --build -d && \
-          rm image_web.tar"
+          podman-compose up --build -d db web"
