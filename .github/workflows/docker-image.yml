@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "master" ]
 
+# env:
+#   DOCKER_IMAGE: creatior3/users-proj:latest
+#   SERVER_SSH: ${{ secrets.SERVER_SSH }}
+#   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
 jobs:
   build:
     name: Build
