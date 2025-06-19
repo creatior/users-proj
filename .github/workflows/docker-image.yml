@@ -19,12 +19,11 @@ jobs:
       - name: Add all repository
         uses: actions/checkout@v3
 
-      - name: Build all images
-        run: docker-compose build
+      - name: Build web image
+        run: docker-compose build web
       
-      - name: Check existence images
+      - name: Check existence image
         run: |
-          docker image inspect postgres:13-alpine
           docker image inspect creatior3/users-proj_web:latest
 
   test:
