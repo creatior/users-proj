@@ -78,6 +78,6 @@ jobs:
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_ADDRESS}} "cd /home/${{ secrets.SERVER_USERNAME }}/tasks/docker && \
           podman pull creatior3/users-proj_web:latest && \
-          podman-compose down -v && \
+          podman-compose down && \
           podman-compose build db web && \
           podman-compose up -d db web"
