@@ -22,7 +22,8 @@ FROM python:3.12-alpine
 WORKDIR /app
 
 COPY --from=builder /app/venv /app/venv
-COPY src /app/src
+COPY python_app/src /app/src
+COPY python_app/tests /app/tests
 
 ENV PATH="/app/venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
