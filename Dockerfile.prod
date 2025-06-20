@@ -1,4 +1,5 @@
-FROM python:3.11-alpine as builder 
+# builder stage
+FROM python:3.12-alpine as builder 
 
 WORKDIR /app
 
@@ -14,8 +15,8 @@ COPY pyproject.toml /app
 RUN pip install --no-cache-dir --upgrade pip && \
 		pip install --no-cache-dir .
 
-
-FROM python:3.11-alpine
+# final stage
+FROM python:3.12-alpine
 
 WORKDIR /app
 
