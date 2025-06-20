@@ -1,5 +1,4 @@
-# builder stage
-FROM python:3.12-alpine AS builder
+FROM python:3.11-alpine as builder
 
 WORKDIR /app
 
@@ -8,25 +7,23 @@ RUN apk add --no-cache python3-dev py3-pip gcc musl-dev
 RUN python -m venv /app/venv
 
 ENV PATH="/app/venv/bin:$PATH" \
-  PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1
 
 COPY pyproject.toml /app
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cach-dir .
+		pip install --no-cache-dir .
 
 
-# final stage
-FROM python:3.12-alpine
+FROM python:3.11-alpine
 
 WORKDIR /app
 
 COPY --from=builder /app/venv /app/venv
-COPY src /app/src
+COPY python_app/src /app/src
 
-ENV PATH="/app/venv/bin:${PATH}" \
+ENV PATH="/app/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8077", "--reload"]
-	
+CMD [ "uvicorn", "src.main:app", "--reload", "--host", "0.0.0.0", "--port", "8077" ]
