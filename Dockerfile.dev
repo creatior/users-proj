@@ -13,7 +13,7 @@ ENV PATH="/app/venv/bin:$PATH" \
 COPY pyproject.toml /app
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cach-dir ".[test]"
+    pip install --no-cache-dir ".[test]"
 
 
 # final stage
